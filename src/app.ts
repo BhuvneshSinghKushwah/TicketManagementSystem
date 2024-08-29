@@ -19,7 +19,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 app.use('/api/users', userRouter);
 app.use('/api/tickets', ticketRouter);
-app.use('/api/analytics', analyticsRouter);
+app.use('/api/dashboard', analyticsRouter);
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);

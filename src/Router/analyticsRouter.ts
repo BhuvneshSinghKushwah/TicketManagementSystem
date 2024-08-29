@@ -1,13 +1,12 @@
-import express, { Router } from 'express';
-const analyticsRouter = Router();
+import { Router } from 'express';
+import { authenticate, authorize } from '../MiddleWare/auth';
+import { AnalyticsController } from '../Controller/analyticsController';
 
-analyticsRouter.get('/dashboard', (req, res) => {
-  // Get analytics dashboard data
+const ticketRouter = Router();
+const ticketController = new AnalyticsController();
+
+ticketRouter.get('/analytics', authenticate, authorize('customer', 'admin'), (req, res) => {
+  ticketController.getAnalytics(req, res);
 });
 
-analyticsRouter.get('/reports', (req, res) => {
-  // Get analytics reports
-});
-
-
-export default analyticsRouter;
+export default ticketRouter;

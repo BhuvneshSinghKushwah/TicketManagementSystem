@@ -23,7 +23,19 @@ class UserController {
             }
             catch (error) {
                 console.log(error);
-                res.status(400).json({ message: 'Error creating user', error: error });
+                res.status(400).json({ message: 'Error creating user', error: error.message });
+            }
+        });
+    }
+    loginUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const jwt = yield this.userService.loginUser(req.body);
+                res.status(200).json(jwt);
+            }
+            catch (error) {
+                console.log(error);
+                res.status(400).json({ message: 'Error Logging In User', error: error.message });
             }
         });
     }
@@ -35,7 +47,7 @@ class UserController {
             }
             catch (error) {
                 console.log(error);
-                res.status(400).json({ message: 'Error fetching users' });
+                res.status(400).json({ message: 'Error fetching users', error: error.message });
             }
         });
     }

@@ -5,12 +5,12 @@ import { TicketController } from '../Controller/ticketController';
 const ticketRouter = Router();
 const ticketController = new TicketController();
 
-ticketRouter.get('/', (req, res) => {
-  // Get all tickets
+ticketRouter.get('/analytics', authenticate, authorize('customer', 'admin'), (req, res) => {
+  ticketController.getTicketsAnalytics(req, res);
 });
 
-ticketRouter.get('/:id', (req, res) => {
-  // Get ticket by id
+ticketRouter.get('/:ticketId', authenticate, authorize('customer', 'admin'), (req, res) => {
+  ticketController.getTicketDetails(req, res);
 });
 
 ticketRouter.post('/', authenticate, authorize('admin'), (req, res) => {
@@ -19,10 +19,6 @@ ticketRouter.post('/', authenticate, authorize('admin'), (req, res) => {
 
 ticketRouter.post('/:ticketId/assign', authenticate, authorize('admin'), (req, res) => {
   ticketController.assignTicket(req, res);
-});
-
-ticketRouter.delete('/:id', (req, res) => {
-  // Delete ticket
 });
 
 export default ticketRouter;

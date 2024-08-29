@@ -13,28 +13,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
-const client_1 = require("@prisma/client");
+require('dotenv').config();
 const userPayload_1 = require("../Model/userPayload");
+const userPayload_2 = require("../Model/userPayload");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const uuid_1 = require("uuid");
-const prisma = new client_1.PrismaClient();
+const database_1 = require("../Model/database");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class UserService {
     createUser(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const parsedData = userPayload_1.createUserPayloadValidation.safeParse(data);
-            if (!parsedData.success) {
-                throw new Error('Invalid data');
-            }
-            const hashedPassword = yield bcrypt_1.default.hash(parsedData.data.password, 10);
+            const parsedData = userPayload_1.createUserPayloadValidation.parse(data);
+            const hashedPassword = yield bcrypt_1.default.hash(parsedData.password, 10);
             const uniqId = (0, uuid_1.v4)();
-            const type = (parsedData.data.type === 'admin') ? client_1.UserType.admin : client_1.UserType.customer;
-            yield prisma.$queryRaw `INSERT INTO Users (uniq_id, email, name, type, password) VALUES (${uniqId}, ${parsedData.data.email}, ${parsedData.data.name}, '${client_1.UserType[type]}', ${hashedPassword});`;
-            return { status: true, message: 'User created successfully' };
+            const updated_at = new Date();
+            yield database_1.pool.query(`INSERT INTO "users" ("uniq_id", "email", "name", "type", "password", "updated_at") VALUES ($1, $2, $3, $4, $5, $6)`, [uniqId, parsedData.email, parsedData.name, parsedData.type, hashedPassword, updated_at]);
+            return { status: true, message: 'User created successfully', userId: uniqId };
+        });
+    }
+    loginUser(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const parsedData = userPayload_2.loginUserPayloadValidation.parse(data);
+            const result = yield database_1.pool.query(`SELECT * FROM "users" WHERE "email" = $1`, [parsedData.email]);
+            if (result.rowCount === 0) {
+                throw new Error('User not found');
+            }
+            const user = result.rows[0];
+            const isValidPassword = yield bcrypt_1.default.compare(parsedData.password, user.password);
+            if (!isValidPassword) {
+                throw new Error('Invalid password');
+            }
+            const payload = {
+                uniq_id: user.uniq_id,
+                exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours expiration
+            };
+            const key = process.env.JWT_SECRET;
+            if (!key) {
+                throw new Error('Something Went Wrong!');
+            }
+            const token = jsonwebtoken_1.default.sign(payload, key);
+            return { status: true, message: 'User logged in successfully', token };
         });
     }
     getUsers() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield prisma.$executeRaw `SELECT * FROM Users;`;
+            const result = yield database_1.pool.query('SELECT * FROM "users";');
+            return result.rows;
         });
     }
 }

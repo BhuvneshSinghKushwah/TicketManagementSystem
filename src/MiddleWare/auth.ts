@@ -20,11 +20,12 @@ const authenticate = async (req: any, res: Response, next: NextFunction) => {
     }
     const decoded = jwt.verify(token, key) as Decoded;
 
-    const result = await pool.query(`SELECT id, type, name FROM users WHERE uniq_id = $1`, [decoded.uniq_id]);
+    const result = await pool.query(`SELECT id, uniq_id, type, name FROM users WHERE uniq_id = $1`, [decoded.uniq_id]);
     if (result.rowCount === 0) {
       throw new Error('User not found');
     }
     req.user_id = result.rows[0].id as number;
+    req.user_uniq_id = result.rows[0].uniq_id as string;
     req.user_role = result.rows[0].type;
     req.user_name = result.rows[0].name;
 

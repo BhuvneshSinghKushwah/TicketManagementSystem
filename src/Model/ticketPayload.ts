@@ -12,3 +12,12 @@ export const createTicketPayloadValidation = z.object({
 });
 
 export type CreateTicketSchema = z.infer<typeof createTicketPayloadValidation>;
+
+export interface QueryParamsAnalytics {
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  priority?: string;
+  type?: string;
+  venue?: string;
+}

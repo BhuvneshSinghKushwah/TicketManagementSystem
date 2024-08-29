@@ -8,32 +8,26 @@ import jwt from 'jsonwebtoken';
 
 export class UserService {
     async createUser(data: CreateUserSchema) {
-        const parsedData = createUserPayloadValidation.safeParse(data);
-        if (!parsedData.success) {
-            throw new Error('Invalid data');
-        }
-        const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
+        const parsedData = createUserPayloadValidation.parse(data);
+        const hashedPassword = await bcrypt.hash(parsedData.password, 10);
         const uniqId = uuidv4();
         const updated_at = new Date();
 
-        await pool.query(`INSERT INTO "users" ("uniq_id", "email", "name", "type", "password", "updated_at") VALUES ($1, $2, $3, $4, $5, $6)`, [uniqId, parsedData.data.email, parsedData.data.name, parsedData.data.type, hashedPassword, updated_at]);
+        await pool.query(`INSERT INTO "users" ("uniq_id", "email", "name", "type", "password", "updated_at") VALUES ($1, $2, $3, $4, $5, $6)`, [uniqId, parsedData.email, parsedData.name, parsedData.type, hashedPassword, updated_at]);
 
-        return { status: true, message: 'User created successfully' };
+        return { status: true, message: 'User created successfully', userId: uniqId };
     }
 
     async loginUser(data: LoginUserSchema) {
-        const parsedData = loginUserPayloadValidation.safeParse(data);
-        if (!parsedData.success) {
-            throw new Error('Invalid data');
-        }
-
-        const result = await pool.query(`SELECT * FROM "users" WHERE "email" = $1`, [parsedData.data.email]);
+        const parsedData = loginUserPayloadValidation.parse(data);
+    
+        const result = await pool.query(`SELECT * FROM "users" WHERE "email" = $1`, [parsedData.email]);
         if (result.rowCount === 0) {
             throw new Error('User not found');
         }
 
         const user = result.rows[0];
-        const isValidPassword = await bcrypt.compare(parsedData.data.password, user.password);
+        const isValidPassword = await bcrypt.compare(parsedData.password, user.password);
         if (!isValidPassword) {
             throw new Error('Invalid password');
         }

@@ -8,9 +8,29 @@ class TicketController {
         this.ticketService = new TicketService();
     }
 
+    async getTicketsAnalytics(req: any, res: Response) {
+        try {
+            const anayltics = await this.ticketService.ticketsAnalytics(req.query);
+            res.status(201).json(anayltics);
+        } catch (error: any) {
+            console.log(error);
+            res.status(400).json({ message: 'Error Getting Tickets Analytics Details', error: error.message });
+        }
+    }
+
+    async getTicketDetails(req: any, res: Response) {
+        try {
+            const ticket = await this.ticketService.getTicket(req.params.ticketId);
+            res.status(201).json(ticket);
+        } catch (error: any) {
+            console.log(error);
+            res.status(400).json({ message: 'Error Getting Ticket Details', error: error.message });
+        }
+    }
+
     async createTicket(req: any, res: Response) {
         try {
-            const ticket = await this.ticketService.createTicket(req.body, req.user_id, req.user_name);
+            const ticket = await this.ticketService.createTicket(req.body, req.user_uniq_id);
             res.status(201).json(ticket);
         } catch (error: any) {
             console.log(error);
