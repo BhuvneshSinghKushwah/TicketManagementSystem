@@ -1,6 +1,7 @@
 1. Create User
 
-![Screenshot from 2024-08-01 10-47-08](https://github.com/user-attachments/assets/994adee9-314b-45b4-bbaa-bb229c3622c2)
+![Screenshot from 2024-08-29 16-36-47](https://github.com/user-attachments/assets/ba91e8b7-8fff-47e9-968d-c2e146223d43)
+
 
 2. Auth Login
 
